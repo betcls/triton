@@ -20,7 +20,7 @@ public class Ip extends HttpServlet
 {
 	private static final long serialVersionUID = 1L;
        
-	String ip = "a.bernard.claeys.d" ;
+	String ip = "a.bernard.c.d" ;
 	
 	
     /**
