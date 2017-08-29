@@ -18,7 +18,7 @@ import boodschap.ProductTable;
 
 
 
-@WebServlet("/Boodschap")
+@WebServlet("/Boodschap2")
 public class Servlet02 extends HttpServlet
 {	MySqlContext sqlContext = null ;
 	
