@@ -48,7 +48,7 @@ public class BoodschapServlet extends HttpServlet {
 			{ // Lokale MySql server aanspreken
 				sqlContext = new MySqlContext("localhost", "Boodschap", "root", "19570219");
 			} else { // Servlet lokaal + mysql via port forward op openshift
-				sqlContext = new MySqlContext("localhost", "Boodschap", "root", "LJq3O4wjrMCbA6bd");
+				sqlContext = new MySqlContext("mysql", "Boodschap", "root", "LJq3O4wjrMCbA6bd");
 			}
 
 			System.out.println("MySql connecteren ...");
