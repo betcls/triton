@@ -43,7 +43,7 @@ public class BoodschapServlet extends HttpServlet {
 			String mysqlPassword = "LJq3O4wjrMCbA6bd" ; //System.getenv("MYSQL_PASSWORD");
 
 			if (host != null || port != null) {
-				sqlContext = new MySqlContext(host + ":" + port, "Adres", mysqlUser, mysqlPassword);
+				sqlContext = new MySqlContext(host + ":" + port, "Boodschap", mysqlUser, mysqlPassword);
 			} else if (false) 
 			{ // Lokale MySql server aanspreken
 				sqlContext = new MySqlContext("localhost", "Boodschap", "root", "19570219");
@@ -52,7 +52,7 @@ public class BoodschapServlet extends HttpServlet {
 			}
 
 			System.out.println("MySql connecteren ...");
-			//sqlContext.connect();
+			sqlContext.connect();
 			System.out.println("Servlet init uitgevoerd");
 			
 			/* Blijkbaar werkt autoreconnect=true niet. Dit hebben we
