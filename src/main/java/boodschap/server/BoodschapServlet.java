@@ -52,7 +52,7 @@ public class BoodschapServlet extends HttpServlet {
 			}
 
 			System.out.println("MySql connecteren ...");
-			sqlContext.connect();
+			//sqlContext.connect();
 			System.out.println("Servlet init uitgevoerd");
 			
 			/* Blijkbaar werkt autoreconnect=true niet. Dit hebben we
