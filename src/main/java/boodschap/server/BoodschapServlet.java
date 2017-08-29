@@ -37,8 +37,8 @@ public class BoodschapServlet extends HttpServlet {
 				 * lokaal werken.
 				 */
 
-			String host = System.getenv("MYSQL_SERVICE_HOST");
-			String port = System.getenv("MYSQL_SERVICE_PORT");
+			String host = "172.30.45.190" ; // System.getenv("mysql_SERVICE_HOST");
+			String port = "3306" ; // System.getenv("mysql_SERVICE_PORT");
 			String mysqlUser = "root" ; //System.getenv("MYSQL_USER");
 			String mysqlPassword = "LJq3O4wjrMCbA6bd" ; //System.getenv("MYSQL_PASSWORD");
 
