@@ -43,7 +43,7 @@ public class BoodschapServlet extends HttpServlet {
 			String mysqlPassword = "LJq3O4wjrMCbA6bd" ; //System.getenv("MYSQL_PASSWORD");
 
 			if (host != null || port != null) {
-				sqlContext = new MySqlContext(host + ":" + port, "Boodschap", mysqlUser, mysqlPassword);
+				sqlContext = new MySqlContext(host + ":" + port, "Adres", mysqlUser, mysqlPassword);
 			} else if (false) 
 			{ // Lokale MySql server aanspreken
 				sqlContext = new MySqlContext("localhost", "Boodschap", "root", "19570219");
