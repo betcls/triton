@@ -1,0 +1,35 @@
+--> Deploying template "openshift/mysql-persistent" to project cls
+
+     MySQL (Persistent)
+     ---------
+     MySQL database service, with persistent storage. For more information about using this template, including OpenShift considerations, see https://github.com/sclorg/mysql-container/blob/master/5.7/README.md.
+     
+     NOTE: Scaling to more than one replica is not supported. You must have persistent volumes available in your cluster to use this template.
+
+     The following service(s) have been created in your project: mysql.
+     
+            Username: adminhCHTwGt
+            Password: v6ITYrv2bjN2
+       Database Name: sampledb
+      Connection URL: mysql://mysql:3306/
+     
+     For more information about using this template, including OpenShift considerations, see https://github.com/sclorg/mysql-container/blob/master/5.7/README.md.
+
+     * With parameters:
+        * Memory Limit=512Mi
+        * Namespace=openshift
+        * Database Service Name=mysql
+        * MySQL Connection Username=adminhCHTwGt
+        * MySQL Connection Password=v6ITYrv2bjN2
+        * MySQL root user Password=LJq3O4wjrMCbA6bd # generated
+        * MySQL Database Name=sampledb
+        * Volume Capacity=1Gi
+        * Version of MySQL Image=5.7
+
+--> Creating resources ...
+    secret "mysql" created
+    service "mysql" created
+    persistentvolumeclaim "mysql" created
+    deploymentconfig "mysql" created
+--> Success
+    Run 'oc status' to view your app.

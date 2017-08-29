@@ -1,0 +1,187 @@
+﻿<!DOCTYPE html>
+<!--
+    Licensed to the Apache Software Foundation (ASF) under one
+    or more contributor license agreements.  See the NOTICE file
+    distributed with this work for additional information
+    regarding copyright ownership.  The ASF licenses this file
+    to you under the Apache License, Version 2.0 (the
+    "License"); you may not use this file except in compliance
+    with the License.  You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+     KIND, either express or implied.  See the License for the
+    specific language governing permissions and limitations
+    under the License.
+-->
+<html>
+<head>
+
+<!--
+    Onderstaande meta door mij toegevoegd zodat het ip adres van de router niet langer gecachet zou worden
+ -->
+<meta http-equiv='cache-control' content='no-cache'>
+<meta http-equiv='expires' content='0'>
+<meta http-equiv='pragma' content='no-cache'>
+
+
+<script type="text/javascript" language="javascript" src="ajax1.js"></script>
+<script type="text/javascript" language="javascript" src="app.js"></script>
+
+
+
+<script type="text/javascript">
+
+	
+	var lastCartUpdate = 0 ;
+	var server = "gc02" ; //window.location.hostname ;
+	var xmlItems = "" ;
+	var filterGekochtSelectie = "" ;
+	var filterSoortSelectie = "" ;
+	var productCode = 0 ;
+	
+	
+	// De variable servlet wordt in app.js gedefinieerd
+	//var servlet = "http://gc02:9090/triton/Boodschap" ;
+	//var servlet = "http://triton-bcrl01.rhcloud.com/Boodschap" ;
+
+
+	function sleep(delay) 
+	{
+    	var start = new Date().getTime();
+    	while (new Date().getTime() < start + delay);
+	}
+ 	
+ 	function laadSoorten()
+	{	
+		xmlHttpRequest= newXMLHttpRequest();
+  		xmlHttpRequest.onreadystatechange = getReadyStateHandler( xmlHttpRequest, verwerkSoortenlijst);
+  		xmlHttpRequest.open("POST", servlet, true);
+ 		xmlHttpRequest.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+  		xmlHttpRequest.send("action=" + "Laad soorten om te sorteren");
+ 	}
+
+ 	
+ 	function verwerkSoortenlijst( cartXML) 
+    {	var cart = cartXML.getElementsByTagName("SoortenSort")[0];
+ 		var generated = cart.getAttribute("generated");
+ 		 		 		
+ 		if (generated > lastCartUpdate) 
+ 		{	lastCartUpdate = generated;
+   			//
+   			var items = cart.getElementsByTagName("item") ;
+   			buildTabel( items) ;
+   		}
+ 		
+ 	}
+ 	
+ 	function buildTabel( items) 
+ 	{	var table= "" ;
+ 		 			
+		for (var i = 0 ; i < items.length ; i++) 
+		{	var item = items[i];
+			var code = "5" ;
+			var soort = item.getElementsByTagName("soort")[0].firstChild.nodeValue;
+			var volgorde = item.getElementsByTagName("volgorde")[0].firstChild.nodeValue;
+     				
+			table += 
+				"<tr>" + 
+				"<td>" + soort + "</td>" +
+				"<td>" + "<input name=\"veld\" id=\"" + soort + "\" value=\"" + volgorde + "\" type=\"text\"  style=\"width: 56px\"  />" +
+    			"</tr>"; 
+   		}
+ 		// plaats het in de tabel 
+ 		document.getElementById("resultTable").innerHTML = table;
+	}
+ 	
+ 	
+	function bewaar()
+	{	// 
+		var items = document.getElementsByName( "veld" );
+		console.log( items.length) ;
+		for (var i = 0 ; i < items.length ; i++) 
+		{	var item = items[i];
+   			console.log( item.value + " " + item.id) ;
+   			updateVolgorde(  item.id, item.value) ;
+   		}
+	}
+	
+	function updateVolgorde( soort, volgorde)
+	{	
+		xmlHttpRequest= newXMLHttpRequest();
+  		xmlHttpRequest.onreadystatechange = getReadyStateHandler( xmlHttpRequest, dummy);
+  		xmlHttpRequest.open("POST", servlet, true);
+ 		xmlHttpRequest.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+  		xmlHttpRequest.send("action=" + "Update volgorde"  + "&soort=" + soort + "&volgorde=" + volgorde);
+ 	}
+ 	function dummy()
+ 	{
+ 	}
+
+</script>
+
+
+
+<style type="text/css">
+.auto-style1 {
+	font-size: x-large
+	}
+.auto-style4 {
+	text-align: center;
+}
+.auto-style5 {
+	border: 1px solid #FF00FF;
+}
+
+</style>
+</head>
+<body  onload="laadSoorten()">
+<div class="auto-style4">
+
+<table  align="center" class="auto-style5">
+	<tr>
+		<td>
+		<input name="Button1" type="button" value="Menu"  onclick="laadMenu()" class="auto-style1">
+		</td>
+		<td colspan="2" style="width: 50%">
+		<input type="button" value="Refresh" onclick="laadSoorten()" name="hallo" class="auto-style1">
+		</td>
+	</tr>
+	<tr>
+		<td> 
+		&nbsp;
+		</td>
+		<td colspan="2">&nbsp;
+		</td>
+	</tr>
+	<tr>
+		<td colspan="2"> 
+		&nbsp;
+		</td>
+		<td>
+		<input type="button" value="Bewaar" onclick="bewaar()" class="auto-style1">
+		</td>
+	</tr>
+	<tr>
+		<td>
+		&nbsp;
+		</td>
+		<td colspan="2">
+		</td>
+	</tr>
+</table>
+</div>
+	
+<div class="auto-style4">
+	&nbsp;<table align="center"  id="resultTable"></table>
+</div>
+
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+
+
+</body>
+</html>

@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<!--
+    Licensed to the Apache Software Foundation (ASF) under one
+    or more contributor license agreements.  See the NOTICE file
+    distributed with this work for additional information
+    regarding copyright ownership.  The ASF licenses this file
+    to you under the Apache License, Version 2.0 (the
+    "License"); you may not use this file except in compliance
+    with the License.  You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+     KIND, either express or implied.  See the License for the
+    specific language governing permissions and limitations
+    under the License.
+-->
+<html>
+<head>
+
+<!--
+    Onderstaande meta door mij toegevoegd zodat het ip adres van de router niet langer gecachet zou worden
+     -->
+<meta http-equiv='cache-control' content='no-cache'>
+<meta http-equiv='expires' content='0'>
+<meta http-equiv='pragma' content='no-cache'>
+<meta charset="UTF-8">
+
+
+<script type="text/javascript" language="javascript" src="ajax1.js"></script>
+<script type="text/javascript" language="javascript" src="app.js"></script>
+
+
+
+<script type="text/javascript">
+
+	
+	var lastCartUpdate = 0 ;
+	var server = "gc02" ; //window.location.hostname ;
+	var xmlItems = "" ;
+	var filterGekochtSelectie = "" ;
+	var filterSoortSelectie = "" ;
+	var productCode = 0 ;
+	
+	
+	// nieuw
+	//var servlet = "http://gc02:9090/triton/Boodschap" ;
+	//var servlet = "http://triton-bcrl01.rhcloud.com/Boodschap" ;
+
+
+	
+	function fetchPublicIp() 
+	{	xmlHttpRequest= new XMLHttpRequest();
+  	xmlHttpRequest.onreadystatechange = 
+  	function() 
+  	{ if( xmlHttpRequest.readyState == 4 && xmlHttpRequest.status == 200) 
+  		{	server = xmlHttpRequest.responseText ; 
+  			alert( "server = " + server + "\n\nBij problemen, wis de app-cache !");
+				document.getElementById( "server").value = server ;
+  		}
+  	};
+  	xmlHttpRequest.open("GET", "http://users.skynet.be/bernard/Rpi/ip.txt", true);
+  	//xmlHttpRequest.open("GET", "http://rpi1:9292/CV/ip.txt", true);
+ 		xmlHttpRequest.send();
+	}
+	
+
+	
+	function laadProducten()
+	{	
+		xmlHttpRequest= newXMLHttpRequest();
+		
+  		xmlHttpRequest.onreadystatechange = getReadyStateHandler( xmlHttpRequest, updateProductenlijst);
+  		
+  		xmlHttpRequest.open("POST", servlet, true);
+  	
+ 		xmlHttpRequest.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+ 		xmlHttpRequest.send("action=" + "LaadLijst");
+	}
+		
+	function updateProductenlijst( cartXML) 
+  {	// De detaillijst moet ook geledigd worden
+    var lijst = document.getElementById("Detaillijst");
+		while (lijst.options.length) 
+   	{	lijst.remove(0);
+    }
+
+    
+ 		var cart = cartXML.getElementsByTagName("Boodschappen")[0];
+ 		var generated = cart.getAttribute("generated");
+ 		var lijst = document.getElementById("Soortlijst");
+ 		var vorigeSoort = "" ;
+ 		
+ 		 		
+ 		if (generated > lastCartUpdate) 
+ 		{	lastCartUpdate = generated;
+   		// Verwijder alle items van de selectlijst	
+ 			while (lijst.options.length) 
+ 			{	lijst.remove(0);
+  		}
+   		//
+   		var items = cart.getElementsByTagName("item");
+   		for (var i = 0 ; i < items.length ; i++) 
+   		{
+   			var item = items[i];
+   			var code = item.getElementsByTagName("id")[0].firstChild.nodeValue;
+   			var soort = item.getElementsByTagName("soort")[0].firstChild.nodeValue;
+   			var naam = item.getElementsByTagName("naam")[0].firstChild.nodeValue;
+    		if( soort != vorigeSoort)
+    		{	var obj = new Option( soort, soort);
+          lijst.options.add( obj);
+          vorigeSoort = soort ;
+        }
+   		}
+ 		}
+ 	}
+ 	
+ 	function laadSoorten()
+	{	
+		xmlHttpRequest= newXMLHttpRequest();
+  		xmlHttpRequest.onreadystatechange = getReadyStateHandler( xmlHttpRequest, updateSoortenlijst);
+  		xmlHttpRequest.open("POST", servlet, true);
+ 		xmlHttpRequest.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+  		xmlHttpRequest.send("action=" + "LaadSoorten");
+ 	}
+
+ 	
+ 	function updateSoortenlijst( cartXML) 
+    {	
+
+    	// De detaillijst moet ook geledigd worden
+    	var lijst = document.getElementById("Detaillijst");
+		while (lijst.options.length) 
+   		{	lijst.remove(0);
+    	}
+ 		
+ 		var lijst = document.getElementById("Soortlijst");
+ 		while (lijst.options.length) 
+   		{	lijst.remove(0);
+    	}
+    	
+    	var filterlijst = document.getElementById("FilterSoortenLijst");
+ 		while (filterlijst.options.length - 1) 
+   		{	filterlijst.remove(1);
+    	}
+    	filterSoortSelectie = "alles" ;
+
+
+    	
+
+		var cart = cartXML.getElementsByTagName("Soorten")[0];
+ 		var generated = cart.getAttribute("generated");
+ 		
+ 		 		
+ 		if (generated > lastCartUpdate) 
+ 		{	lastCartUpdate = generated;
+   			
+   			//
+   			var items = cart.getElementsByTagName("item");
+   			for (var i = 0 ; i < items.length ; i++) 
+   			{	var item = items[i];
+     			var soort = item.getElementsByTagName("soort")[0].firstChild.nodeValue;
+     		    var obj1 = new Option( soort, soort);
+            	lijst.options.add( obj1); 
+            	var obj2 = new Option( soort, soort);
+            	filterlijst.options.add( obj2); 
+
+   			}
+ 		}
+ 		laadDetaillijst() ;
+ 	}
+
+ 	
+ 	/*
+ 	function wijzig( code) 
+    { var lijst = document.getElementById("SoortLijst");
+    	var selCar = lijst.options[lijst.selectedIndex].value;
+		var veld = document.getElementById("Veld01");
+		veld.value = selCar ;
+	}
+	*/
+	function laadDetaillijst( code) 
+	{	
+		
+	
+		xmlHttpRequest= newXMLHttpRequest();
+  		xmlHttpRequest.onreadystatechange = getReadyStateHandler( xmlHttpRequest, updateDetaillijst);
+  		xmlHttpRequest.open("POST", servlet, true);
+ 		xmlHttpRequest.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+ 		xmlHttpRequest.send("action=" + "LaadLijst");
+ 		
+ 		
+ 		var lijst = document.getElementById("FilterSoortenLijst");
+ 		lijst.value = code ;
+ 		filterSoortSelectie = code ;
+ 		
+ 		
+ 		
+		buildProductTabel() ;
+
+ 		
+	}
+ 
+    
+    function updateDetaillijst( cartXML) 
+    {
+ 		var cart = cartXML.getElementsByTagName("Boodschappen")[0];
+ 		var generated = cart.getAttribute("generated");
+ 		var lijst = document.getElementById("Detaillijst");
+ 		 		
+ 		var soortLijst = document.getElementById("Soortlijst") ;
+ 		var selSoort = soortLijst.options[soortLijst.selectedIndex].value;
+    	 		 
+		
+		
+ 		if (generated > lastCartUpdate) 
+ 		{	lastCartUpdate = generated;
+   			// Verwijder alle items van de selectlijst	
+   			while (lijst.options.length) 
+   			{	lijst.remove(0);
+    		}
+   			//
+   			var items = cart.getElementsByTagName("item");
+   			for (var i = 0 ; i < items.length ; i++) 
+   			{
+     			var item = items[i];
+     			var code = item.getElementsByTagName("id")[0].firstChild.nodeValue;
+     			var soort = item.getElementsByTagName("soort")[0].firstChild.nodeValue;
+     			var naam = item.getElementsByTagName("naam")[0].firstChild.nodeValue;
+    		    			
+    		    if( selSoort == soort)
+    		    {	var obj = new Option( naam, code);
+            		lijst.options.add( obj);
+            		
+            	}
+   			}
+   			
+ 		}
+ 		wijzigDetaillijst( null) ; 	
+ 	}
+ 	
+ 	
+ 	function wijzigDetaillijst( code) 
+    { 	var lijst = document.getElementById("Detaillijst") ;
+    	var code = lijst.options[lijst.selectedIndex].value ;
+		//var veld = document.getElementById("veldCode") ;
+		productCode = code ;
+		
+		xmlHttpRequest= newXMLHttpRequest();
+		
+  		xmlHttpRequest.onreadystatechange = getReadyStateHandler( xmlHttpRequest, verwerkAantal);
+  		xmlHttpRequest.open("POST", servlet, true);
+ 		xmlHttpRequest.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+ 		xmlHttpRequest.send("action=" + "geef aantal" + "&code=" + code);
+	}
+	
+	function verwerkAantal( cartXML) 
+    {	
+    	var veldAantal = document.getElementById("veldAantal") ;
+    	   
+ 		var cart = cartXML.getElementsByTagName("Product")[0];
+ 		var generated = cart.getAttribute("generated");
+ 		
+ 		 		
+ 		
+    	 		 		
+ 		if (generated > lastCartUpdate) 
+ 		{	lastCartUpdate = generated;
+   			
+   			//
+   			var items = cart.getElementsByTagName("item");
+   			for (var i = 0 ; i < items.length ; i++) 
+   			{
+     			var item = items[i];
+     			var code = item.getElementsByTagName("id")[0].firstChild.nodeValue;
+     			var soort = item.getElementsByTagName("soort")[0].firstChild.nodeValue;
+     			var naam = item.getElementsByTagName("naam")[0].firstChild.nodeValue;
+     			var aantal = item.getElementsByTagName("aantal")[0].firstChild.nodeValue;
+	
+				if( aantal == "-") aantal = "" ;
+    		    
+				veldAantal.value = aantal ;
+		
+    		    
+   			}
+ 		}
+ 		
+ 	}
+
+
+	
+	
+	
+	
+	function bewaar() 
+	{	var aantal = document.getElementById("veldAantal").value ;
+		
+		if( aantal.trim() == "") aantal = "ja" ;
+		
+		xmlHttpRequest= newXMLHttpRequest();
+  		xmlHttpRequest.onreadystatechange = getReadyStateHandler( xmlHttpRequest, myFunction);
+  		xmlHttpRequest.open("POST", servlet, true);
+ 		xmlHttpRequest.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+ 		xmlHttpRequest.send("action=" + "bewaar" + "&code=" + productCode + "&aantal=" + aantal);
+	}
+	
+	function wis( code) 
+	{	xmlHttpRequest= newXMLHttpRequest();
+		
+  		xmlHttpRequest.onreadystatechange = getReadyStateHandler( xmlHttpRequest, myFunction);
+  		xmlHttpRequest.open("POST", servlet, true);
+ 		xmlHttpRequest.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+ 		xmlHttpRequest.send("action=" + "bewaar" + "&code=" + code + "&aantal=" + "-");
+ 		
+	}
+	
+	function markeerGekocht( code) 
+	{	xmlHttpRequest= newXMLHttpRequest();
+		
+  		xmlHttpRequest.onreadystatechange = getReadyStateHandler( xmlHttpRequest, myFunction);
+  		xmlHttpRequest.open("POST", servlet, true);
+ 		xmlHttpRequest.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+ 		xmlHttpRequest.send("action=" + "markeerGekocht" + "&code=" + code);
+ 		
+	}
+
+
+	
+ 		
+ 	function myFunction(cartXML) 
+ 	{
+ 		var table= "" ; //"<tr><th>Soort</th><th>Product</th><th>Aantal</th></tr>";
+
+ 		var cart = cartXML.getElementsByTagName("Boodschappen")[0];
+ 		var generated = cart.getAttribute("generated");
+ 		var lijst = document.getElementById("Detaillijst");
+ 		 		
+ 		//var soortLijst = document.getElementById("Soortlijst") ;
+ 		//var selSoort = soortLijst.options[soortLijst.selectedIndex].value;
+    	 		 		
+ 		if (generated > lastCartUpdate) 
+ 		{	lastCartUpdate = generated;
+   			// Verwijder alle items van de selectlijst	
+   			
+   			//
+   			var items = cart.getElementsByTagName("item");
+   			xmlItems = items ;
+   			
+   			buildProductTabel() ;
+   			/*
+   			for (var i = 0 ; i < items.length ; i++) 
+   			{
+     			var item = items[i];
+     			var code = item.getElementsByTagName("id")[0].firstChild.nodeValue;
+     			var soort = item.getElementsByTagName("soort")[0].firstChild.nodeValue;
+     			var naam = item.getElementsByTagName("naam")[0].firstChild.nodeValue;
+     			var aantal = item.getElementsByTagName("aantal")[0].firstChild.nodeValue;
+     			var gekocht = item.getElementsByTagName("gekocht")[0].firstChild.nodeValue;
+     			
+     			var isChecked = "" ;
+     			if( gekocht != "false") isChecked = " checked=\"checked\" " ;
+     			var style = "" ;
+     			if( gekocht == "true")
+     				style = " class=\"auto-style2\" " ;
+     			else
+     				style = "" ;
+
+				
+				if( aantal != "-") 
+				{	table += 
+						"<tr>" + 
+						"<td>" + soort + "</td>" + 
+						"<td>" + naam + "</td>" + 
+						"<td>" + aantal + "</td>" +
+						"<td>&nbsp;&nbsp;&nbsp;&nbsp;</td>" +
+						"<td>" + "<input type=\"button\"" + "name=\"" + code + "\"" +" value=\"Wis\" onclick=\"wis(this.name)\">"  + "</td>" +
+						"<td>&nbsp;&nbsp;&nbsp;&nbsp;</td>" +
+						//"<td>" + "<input " + isChecked + "type=\"checkbox\"" + style +"name=\"" + code + "\"" +" onclick=\"markeerGekocht(this.name)\"   class=\"auto-style1\"  >"  + "</td>" +
+						"<td>" + "<input type=\"button\"" + style + "name=\"" + code + "\"" +" value=\"...\" onclick=\"markeerGekocht(this.name)\">"  + "</td>" +
+
+    					"</tr>";   			
+    			}
+    		}
+    		
+    		document.getElementById("demo").innerHTML = table;
+    		*/
+ 		}
+ 		
+
+  		
+	}
+	
+	function buildProductTabel() 
+ 	{
+ 		var table= "" ; //"<tr><th>Soort</th><th>Product</th><th>Aantal</th></tr>";
+
+ 		
+    	 		 		
+ 		 	
+ 		
+   			
+   			for (var i = 0 ; i < xmlItems.length ; i++) 
+   			{
+     			var item = xmlItems[i];
+     			var code = item.getElementsByTagName("id")[0].firstChild.nodeValue;
+     			var soort = item.getElementsByTagName("soort")[0].firstChild.nodeValue;
+     			var naam = item.getElementsByTagName("naam")[0].firstChild.nodeValue;
+     			var aantal = item.getElementsByTagName("aantal")[0].firstChild.nodeValue;
+     			var gekocht = item.getElementsByTagName("gekocht")[0].firstChild.nodeValue;
+     			
+     			var isChecked = "" ;
+     			if( gekocht != "false") isChecked = " checked=\"checked\" " ;
+     			
+     			var style = "" ;
+     			if( gekocht == "true")
+     				style = " class=\"auto-style6\" " ;
+     			else
+     				style = "" ;
+     				
+     			if( filterGekochtSelectie == "teKopen" && gekocht == "true") continue ;
+     			if( filterGekochtSelectie == "gekocht" && gekocht == "false") continue ;
+     			
+     			if( filterSoortSelectie == "alles") {}
+     			else if( filterSoortSelectie != soort) continue ;
+
+     			
+
+
+				
+				if( aantal != "-") 
+				{	table += 
+						"<tr>" + 
+						"<td>" + soort + "</td>" + 
+						"<td class=\"auto-style6\">" + naam + "</td>" + 
+						"<td>" + aantal + "</td>" +
+						"<td>&nbsp;&nbsp;&nbsp;&nbsp;</td>" +
+						"<td>" + "<input type=\"button\"" + "name=\"" + code + "\"" +" value=\"Wis\" onclick=\"wis(this.name)\">"  + "</td>" +
+						"<td>&nbsp;&nbsp;&nbsp;&nbsp;</td>" +
+						//"<td>" + "<input " + isChecked + "type=\"checkbox\"" + style +"name=\"" + code + "\"" +" onclick=\"markeerGekocht(this.name)\"   class=\"auto-style1\"  >"  + "</td>" +
+						//"<td>" + "<input type=\"button\"" + style + "name=\"" + code + "\"" +" value=\"...\" onclick=\"markeerGekocht(this.name)\">"  + "</td>" +
+
+    					"</tr>"; 
+    				if( ! document.getElementById("spatie").checked) continue ;
+    				table += "<tr>" + 
+						"<td>&nbsp;</td>" + 
+						"<td>&nbsp;</td>" + 
+						"<td>&nbsp;</td>" +
+						"<td>&nbsp;</td>" +
+						"<td>&nbsp;</td>" +
+						"<td>&nbsp;</td>" +
+						"<td>&nbsp;</td>" +
+
+    					"</tr>";  
+		
+    			}
+    		}
+ 		
+ 		
+
+  		document.getElementById("demo").innerHTML = table;
+	}
+
+ 	
+	function action_filtersoort( value)
+ 	{	
+ 		filterSoortSelectie  = value ;
+ 		buildProductTabel() ;
+ 	
+ 	}
+	
+ 		
+ 	function action_filtergekocht( value)
+ 	{	
+ 		filterGekochtSelectie  = value ;
+ 		buildProductTabel() ;
+ 	
+ 	}
+ 	
+ 	
+
+	
+	
+
+	
+
+
+	
+ 	
+ 	
+	
+	
+	
+
+</script>
+
+
+
+<style type="text/css">
+.auto-style1 {
+	font-size: x-large
+	}
+.auto-style2 {
+	font-size: large
+	}
+
+	
+.auto-style4 {
+	text-align: center;
+}
+
+.auto-style5 {
+	border: 1px solid #FF00FF;
+}
+
+.auto-style6 {
+	font-size: large;
+	color: #0000FF;
+}
+
+</style>
+</head>
+<body  onload="laadSoorten()">
+<div class="auto-style4">
+<!--
+<table style="width: 400px" align="center" class="auto-style5">
+-->
+<table  align="center" class="auto-style5">
+
+			<tr>
+				<td>
+				<input name="Button1" type="button" value="Menu"  onclick="laadMenu()" class="auto-style1">
+				</td>
+				<td colspan="2" style="width: 50%">
+				<input type="button" value="Refresh" onclick="laadSoorten()" name="hallo" class="auto-style1">
+				</td>
+			</tr>
+			<tr>
+				<td> 
+
+	<select onChange="laadDetaillijst(this.value)" onClick="laadDetaillijst(this.value)" id="Soortlijst" name="ee1" class="auto-style2">
+	
+	
+	</select></td>
+				<td colspan="2"><select  onChange="wijzigDetaillijst(this.value)"  onClick="wijzigDetaillijst(this.value)" id="Detaillijst" name="ee" class="auto-style2">
+	
+		
+	</select></td>
+			</tr>
+			<tr>
+				<td colspan="2"> 
+
+				<input id="veldAantal" name="Text2" value="0" size="10" style="width: 155px" ></td>
+				<td>
+	<input type="button" value="Bewaar" onclick="bewaar()" class="auto-style1"></td>
+			</tr>
+			<tr>
+				<td>
+	<select  onChange="action_filtersoort(this.value)" onClick="action_filtersoort(this.value)" id="FilterSoortenLijst" name="D1" class="auto-style2" >
+		<option value="alles">alle soorten</option>
+	</select></td>
+				<td colspan="2">
+	<!--
+	<select  onChange="action_filtergekocht(this.value)" onClick="action_filtergekocht(this.value)" id="filtergekocht" name="D2" class="auto-style2">
+		<option value="alles">kopen/gekocht</option>
+		<option value="teKopen">te kopen</option>
+		<option value="gekocht">gekocht</option>
+	</select>
+	-->
+	<input id="spatie" type="checkbox"></td>
+			</tr>
+		</table>
+	</div>
+	<div class="auto-style4">
+	&nbsp;<table align="center"  id="demo"></table>
+	</div>
+
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+
+
+</body>
+</html>

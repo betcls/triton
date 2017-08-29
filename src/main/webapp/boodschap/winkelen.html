@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<!--
+    Licensed to the Apache Software Foundation (ASF) under one
+    or more contributor license agreements.  See the NOTICE file
+    distributed with this work for additional information
+    regarding copyright ownership.  The ASF licenses this file
+    to you under the Apache License, Version 2.0 (the
+    "License"); you may not use this file except in compliance
+    with the License.  You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+     KIND, either express or implied.  See the License for the
+    specific language governing permissions and limitations
+    under the License.
+-->
+<html>
+<head>
+
+<!--
+    Onderstaande meta door mij toegevoegd zodat het ip adres van de router niet langer gecachet zou worden
+     -->
+<meta http-equiv='cache-control' content='no-cache'>
+<meta http-equiv='expires' content='0'>
+<meta http-equiv='pragma' content='no-cache'>
+
+
+
+<script type="text/javascript" language="javascript" src="ajax1.js"></script>
+<script type="text/javascript" language="javascript" src="app.js"></script>
+
+
+
+<script type="text/javascript">
+
+	
+	var lastCartUpdate = 0 ;
+	var server = "gc02" ; //window.location.hostname ;
+	var xmlItems = "" ;
+	var filterGekochtSelectie = "teKopen" ;
+	var filterSoortSelectie = "" ;
+	
+	// nieuw
+	//var servlet = "http://gc02:9090/triton/Boodschap" ;
+	//var servlet = "http://triton-bcrl01.rhcloud.com/Boodschap" ;
+
+	
+	
+	function fetchPublicIp() 
+	{	xmlHttpRequest= new XMLHttpRequest();
+  	xmlHttpRequest.onreadystatechange = 
+  	function() 
+  	{ if( xmlHttpRequest.readyState == 4 && xmlHttpRequest.status == 200) 
+  		{	server = xmlHttpRequest.responseText ; 
+  			alert( "server = " + server + "\n\nBij problemen, wis de app-cache !");
+				document.getElementById( "server").value = server ;
+  		}
+  	};
+  	xmlHttpRequest.open("GET", "http://users.skynet.be/bernard/Rpi/ip.txt", true);
+  	//xmlHttpRequest.open("GET", "http://rpi1:9292/CV/ip.txt", true);
+ 		xmlHttpRequest.send();
+	}
+	
+	function sleep(milliseconds) {
+	  var start = new Date().getTime();
+	  for (var i = 0; i < 1e7; i++) {
+	    if ((new Date().getTime() - start) > milliseconds){
+	      break;
+	    }
+	  }
+	}
+	
+	function laadProducten()
+	{	
+		xmlHttpRequest= newXMLHttpRequest();
+		
+  		xmlHttpRequest.onreadystatechange = getReadyStateHandler( xmlHttpRequest, updateProductenlijst);
+  		
+  		xmlHttpRequest.open("POST", servlet, true);
+  	
+ 		xmlHttpRequest.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+ 		xmlHttpRequest.send("action=" + "LaadLijst");
+	}
+		
+	function updateProductenlijst( cartXML) 
+  {	// De detaillijst moet ook geledigd worden
+    var lijst = document.getElementById("Detaillijst");
+		while (lijst.options.length) 
+   	{	lijst.remove(0);
+    }
+
+    
+ 		var cart = cartXML.getElementsByTagName("Boodschappen")[0];
+ 		var generated = cart.getAttribute("generated");
+ 		var lijst = document.getElementById("Soortlijst");
+ 		var vorigeSoort = "" ;
+ 		
+ 		 		
+ 		if (generated > lastCartUpdate) 
+ 		{	lastCartUpdate = generated;
+   		// Verwijder alle items van de selectlijst	
+ 			while (lijst.options.length) 
+ 			{	lijst.remove(0);
+  		}
+   		//
+   		var items = cart.getElementsByTagName("item");
+   		for (var i = 0 ; i < items.length ; i++) 
+   		{
+   			var item = items[i];
+   			var code = item.getElementsByTagName("id")[0].firstChild.nodeValue;
+   			var soort = item.getElementsByTagName("soort")[0].firstChild.nodeValue;
+   			var naam = item.getElementsByTagName("naam")[0].firstChild.nodeValue;
+    		if( soort != vorigeSoort)
+    		{	var obj = new Option( soort, soort);
+          lijst.options.add( obj);
+          vorigeSoort = soort ;
+        }
+   		}
+ 		}
+ 	}
+ 	
+ 	function laadSoorten()
+	{	
+		xmlHttpRequest= newXMLHttpRequest();
+  		xmlHttpRequest.onreadystatechange = getReadyStateHandler( xmlHttpRequest, updateSoortenlijst);
+  		//xmlHttpRequest.open("POST", "http://" + server + ":9191/servlet/boodschap.server.Servlet02", true);
+  		xmlHttpRequest.open("POST", servlet, true);
+ 		xmlHttpRequest.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+  		xmlHttpRequest.send("action=" + "LaadSoorten");
+ 	}
+ 	
+ 	
+
+ 	
+ 	function updateSoortenlijst( cartXML) 
+    {	
+
+    	// De detaillijst moet ook geledigd worden
+    	
+    	
+    	var filterlijst = document.getElementById("FilterSoortenLijst");
+ 		while (filterlijst.options.length - 1) 
+   		{	filterlijst.remove(1);
+    	}
+    	filterSoortSelectie = "alles" ;
+
+
+    	
+
+		var cart = cartXML.getElementsByTagName("Soorten")[0];
+ 		var generated = cart.getAttribute("generated");
+ 		
+ 		 		
+ 		if (generated > lastCartUpdate) 
+ 		{	lastCartUpdate = generated;
+   			
+   			//
+   			var items = cart.getElementsByTagName("item");
+   			for (var i = 0 ; i < items.length ; i++) 
+   			{	var item = items[i];
+     			var soort = item.getElementsByTagName("soort")[0].firstChild.nodeValue;
+     		    var obj1 = new Option( soort, soort);
+            	//lijst.options.add( obj1); 
+            	var obj2 = new Option( soort, soort);
+            	filterlijst.options.add( obj2); 
+
+   			}
+ 		}
+ 		
+ 		
+ 		
+ 		
+
+
+ 		
+ 		laadDetaillijst() ;
+ 		
+ 		//var lijst = document.getElementById("filtergekocht") ;
+ 		//filterGekochtSelectie = lijst[1] ;
+	// 		lijst.value = "teKopen" ;
+ 		//lijst.selectedIndex = 0 ;
+ 		
+
+
+ 		
+ 		
+ 		
+ 		
+
+ 	}
+
+ 	
+ 	/*
+ 	function wijzig( code) 
+    { var lijst = document.getElementById("SoortLijst");
+    	var selCar = lijst.options[lijst.selectedIndex].value;
+		var veld = document.getElementById("Veld01");
+		veld.value = selCar ;
+	}
+	*/
+	function laadDetaillijst( code) 
+	{	
+		
+	
+		xmlHttpRequest= newXMLHttpRequest();
+  		xmlHttpRequest.onreadystatechange = getReadyStateHandler( xmlHttpRequest, myFunction);
+  		xmlHttpRequest.open("POST", servlet, true);
+ 		xmlHttpRequest.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+ 		xmlHttpRequest.send("action=" + "Laad winkelenLijst"); 
+ 		// is gesorteerd op "volgorde" 		
+ 		
+ 		
+
+ 		
+	}
+ 
+    
+    
+ 	
+ 	
+ 	function wijzigDetaillijst( code) 
+    { 	var lijst = document.getElementById("Detaillijst") ;
+    	var code = lijst.options[lijst.selectedIndex].value ;
+		var veld = document.getElementById("veldCode") ;
+		veld.value = code ;
+		
+		xmlHttpRequest= newXMLHttpRequest();
+		
+  		xmlHttpRequest.onreadystatechange = getReadyStateHandler( xmlHttpRequest, verwerkAantal);
+  		xmlHttpRequest.open("POST", servlet, true);
+ 		xmlHttpRequest.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+ 		xmlHttpRequest.send("action=" + "geef aantal" + "&code=" + code);
+	}
+	
+	function verwerkAantal( cartXML) 
+    {	
+    	var veldAantal = document.getElementById("veldAantal") ;
+    	   
+ 		var cart = cartXML.getElementsByTagName("Product")[0];
+ 		var generated = cart.getAttribute("generated");
+ 		
+ 		 		
+ 		
+    	 		 		
+ 		if (generated > lastCartUpdate) 
+ 		{	lastCartUpdate = generated;
+   			
+   			//
+   			var items = cart.getElementsByTagName("item");
+   			for (var i = 0 ; i < items.length ; i++) 
+   			{
+     			var item = items[i];
+     			var code = item.getElementsByTagName("id")[0].firstChild.nodeValue;
+     			var soort = item.getElementsByTagName("soort")[0].firstChild.nodeValue;
+     			var naam = item.getElementsByTagName("naam")[0].firstChild.nodeValue;
+     			var aantal = item.getElementsByTagName("aantal")[0].firstChild.nodeValue;
+	
+				if( aantal == "-") aantal = "" ;
+    		    
+				veldAantal.value = aantal ;
+		
+    		    
+   			}
+ 		}
+ 		
+ 	}
+
+
+	
+	
+	
+	
+	
+	
+	function wis( code) 
+	{	xmlHttpRequest= new XMLHttpRequest();
+		
+  		xmlHttpRequest.onreadystatechange = getReadyStateHandler( xmlHttpRequest, myFunction);
+  		xmlHttpRequest.open("POST", servlet, true);
+ 		xmlHttpRequest.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+ 		xmlHttpRequest.send("action=" + "bewaar" + "&code=" + code + "&aantal=" + "-");
+ 		
+	}
+	
+	function markeerGekocht( code) 
+	{	xmlHttpRequest= new XMLHttpRequest();
+		
+  		xmlHttpRequest.onreadystatechange = getReadyStateHandler( xmlHttpRequest, myFunction);
+  		xmlHttpRequest.open("POST", servlet, true);
+ 		xmlHttpRequest.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+ 		xmlHttpRequest.send("action=" + "markeerGekocht" + "&code=" + code);
+ 		
+	}
+
+
+	
+ 		
+ 	function myFunction(cartXML) 
+ 	{
+ 		var cart = cartXML.getElementsByTagName("Boodschappen")[0];
+ 		var generated = cart.getAttribute("generated");
+ 		var lijst = document.getElementById("Detaillijst");
+ 		
+ 		var totaalTeKopen = 0 ;
+ 		var totaalGekocht = 0 ;
+ 		 		
+ 		//var soortLijst = document.getElementById("Soortlijst") ;
+ 		//var selSoort = soortLijst.options[soortLijst.selectedIndex].value;
+    	 		 		
+ 		if (generated > lastCartUpdate) 
+ 		{	lastCartUpdate = generated;
+   			// Verwijder alle items van de selectlijst	
+   			
+   			//
+   			var items = cart.getElementsByTagName("item");
+   			xmlItems = items ;
+   			
+   			
+   			
+   			for (var i = 0 ; i < xmlItems.length ; i++) 
+   			{	
+   				var item = xmlItems[i];
+     			var aantal = item.getElementsByTagName("aantal")[0].firstChild.nodeValue;
+     			var gekocht = item.getElementsByTagName("gekocht")[0].firstChild.nodeValue;
+     			
+     			if( aantal != "-")
+     			{	if( gekocht == "true") totaalGekocht++ ;
+     				else totaalTeKopen++ ;
+     			}
+     			
+
+			}
+			document.getElementById("tellerTeKopen").innerHTML = totaalTeKopen ;
+			document.getElementById("tellerGekocht").innerHTML = totaalGekocht ;
+
+   			
+   			buildProductTabel() ;
+   			
+ 		}
+ 		
+
+  		
+	}
+	
+	function buildProductTabel() 
+ 	{
+ 		var table= "" ; //"<tr><th>Soort</th><th>Product</th><th>Aantal</th></tr>";
+
+ 		
+    	 		 		
+ 		 	
+ 		
+   			var currentVolgorde = "" ;
+   			var flipColor = false ;
+
+   			for (var i = 0 ; i < xmlItems.length ; i++) 
+   			{
+     			var item = xmlItems[i];
+     			var code = item.getElementsByTagName("id")[0].firstChild.nodeValue;
+     			var soort = item.getElementsByTagName("soort")[0].firstChild.nodeValue;
+     			var naam = item.getElementsByTagName("naam")[0].firstChild.nodeValue;
+     			var aantal = item.getElementsByTagName("aantal")[0].firstChild.nodeValue;
+     			var gekocht = item.getElementsByTagName("gekocht")[0].firstChild.nodeValue;
+     			var volgorde = item.getElementsByTagName("volgorde")[0].firstChild.nodeValue;
+
+     			if( currentVolgorde != volgorde)
+     			{	if( flipColor == true) 
+     				{	flipColor = false ;
+     				}
+     				else
+     				{	flipColor = true ;
+     				}
+     				currentVolgorde = volgorde 	
+     			}
+
+     			
+				/*     			
+     			var style = "" ;
+     			if( gekocht == "true")
+     				style = " class=\"auto-style3\" " ;
+     			else
+     				style = " class=\"auto-style2\" " ;
+     			*/	
+     			var style = "" ;
+     			if( gekocht == "true")
+     				style = " class=\"auto-style3\" " ;
+     			else
+     			{	if( flipColor)
+     					style = " class=\"auto-style2\" " ;
+     				else
+     					style = " class=\"auto-style1\" " ;
+
+     			}
+
+     				
+     				
+     			if( filterGekochtSelectie == "teKopen" && gekocht == "true") continue ;
+     			if( filterGekochtSelectie == "gekocht" && gekocht == "false") continue ;
+     			
+     			if( filterSoortSelectie == "alles") {}
+     			else if( filterSoortSelectie != soort) continue ;
+
+     			
+
+
+				/*				
+				if( aantal != "-") 
+				{	table += 
+						"<tr>" + 
+						"<td>" + soort + "</td>" + 
+						"<td class=\"auto-style2\">" + naam + "</td>" + 
+						"<td>" + aantal + "</td>" +
+						"<td>&nbsp;&nbsp;&nbsp;&nbsp;</td>" +
+						"<td>" + "<input type=\"button\"" + "name=\"" + code + "\"" +" value=\"Wis\" onclick=\"wis(this.name)\">"  + "</td>" +
+						"<td>&nbsp;&nbsp;&nbsp;&nbsp;</td>" +
+						//"<td>" + "<input " + isChecked + "type=\"checkbox\"" + style +"name=\"" + code + "\"" +" onclick=\"markeerGekocht(this.name)\"   class=\"auto-style1\"  >"  + "</td>" +
+						"<td>" + "<input type=\"button\"" + style + "name=\"" + code + "\"" +" value=\"...\" onclick=\"markeerGekocht(this.name)\">"  + "</td>" +
+
+    					"</tr>"; 
+    				//if( ! document.getElementById("spatie").checked) continue ;
+    				table += "<tr>" + 
+						"<td>&nbsp;</td>" + 
+						"<td>&nbsp;</td>" + 
+						"<td>&nbsp;</td>" +
+						"<td>&nbsp;</td>" +
+						"<td>&nbsp;</td>" +
+						"<td>&nbsp;</td>" +
+						"<td>&nbsp;</td>" +
+
+    					"</tr>";  
+		
+    			}
+    			*/
+    			
+    			if( aantal != "-") 
+				{	if( aantal == "ja") aantal = "" ;
+					else
+					{	aantal = " : <span class=\"auto-style6\">" + aantal + "</span>" ;
+					}
+				
+					table += 
+						"<tr>" + 
+						"<td " + style + "id=\"" + code + "\" onclick=\"markeerGekocht(" + code + ")\">" + naam + aantal +"</td>" + 
+						
+    					"</tr>"; 
+    				 
+		
+    			}
+
+    			
+    		}
+ 		
+ 		
+
+  		document.getElementById("demo").innerHTML = table;
+	}
+
+ 	
+	function action_filtersoort( value)
+ 	{	
+ 		filterSoortSelectie  = value ;
+ 		buildProductTabel() ;
+ 	
+ 	}
+	
+ 		
+ 	function action_filtergekocht( value)
+ 	{	
+ 		filterGekochtSelectie  = value ;
+ 		buildProductTabel() ;
+ 	
+ 	}
+ 	
+ 	
+
+	
+	
+
+	
+
+
+	
+ 	
+ 	
+	
+	
+	
+
+</script>
+
+
+
+<style type="text/css">
+	
+.auto-style1
+{	color: #0000FF;
+	background-color: #D9D9D9;
+	text-align: center;
+	font-size: xx-large;
+}
+
+.auto-style2 
+{	color: #0000FF;
+
+	background-color: #C0C0C0;
+
+
+	text-align: center;
+	font-size: xx-large;
+
+}
+	
+	
+.auto-style3 
+{	background-color: #00FF00;
+	text-align: center;
+	font-size: large;
+
+}
+
+	
+.auto-style4 {
+	text-align: center;
+}
+
+.auto-style5 {
+	font-size: large;
+}
+
+
+</style>
+</head>
+<body onload="laadSoorten()">
+
+
+
+	
+
+	<div class="auto-style4">
+
+	<input type="button" value="Menu" onclick="laadMenu()" name="hallo1" class="auto-style5">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+	<input type="button" value="Refresh" onclick="laadSoorten()" name="hallo" class="auto-style5"><br>
+		<br>&nbsp;<select  onChange="action_filtersoort(this.value)" onClick="action_filtersoort(this.value)" id="FilterSoortenLijst" class="auto-style5" >
+		<option value="alles">alle soorten</option>
+	</select>
+	<select  onChange="action_filtergekocht(this.value)" onClick="action_filtergekocht(this.value)" id="filtergekocht" class="auto-style5" >
+		<option value="teKopen">te kopen</option>
+		<option value="gekocht">gekocht</option>
+		<option value="alles">kopen/gekocht</option>
+	</select>
+	<br>
+	Nog te kopen = <span id="tellerTeKopen" class="auto-style2">xx</span> / 
+		reeds gekocht = <span id="tellerGekocht" class="auto-style3">xx</span>
+	</div>
+	<hr>
+	
+	<table align="center"  id="demo" cellspacing="5"></table>
+
+
+</body>
+</html>

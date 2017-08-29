@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="ISO-8859-1">
+<title>Insert title here</title>
+
+<script type="text/javascript">
+
+var personen = [ "ik", "jij", "zij" ] ;
+
+var mannen = new Array("Jeroen", "Jan", "Kevin", "Eric", "Luc") ;
+var vrouwen = new Array( "Katrien", "Els", "Nele", "Eva") ;
+var namen = mannen.concat( vrouwen) ;
+
+//namen.sort().reverse() ;
+
+var person = { firstName:"John", lastName:"Doe", age:50, eyeColor:"blue"};
+
+var myJSON = {"mainStore":[{vehicle:'1',description:'nothing to say'},{vehicle:'2',description:'nothing to say'},{vehicle:'3',description:'nothing to say'}]};
+var mainStore = myJSON.mainStore;
+
+
+function voegtoe()
+{	//personen.push( person) ;
+	//document.getElementById("demo").innerHTML = personen ;
+	
+	document.getElementById("demo").innerHTML = myJSON.mainStore.length ;
+	
+	
+}
+
+
+</script>
+</head>
+<body>
+
+<input type="button" value="Lijstje maken" onclick="voegtoe()" />
+   
+   
+<p id="demo"></p>   		  
+      		
+</body>
+
+</html>

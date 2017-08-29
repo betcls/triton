@@ -59,6 +59,7 @@ public class MySqlContext implements SqlContext
     { this.dbUrl = this.fullDbUrl ;
     }
     this.dbCon = DriverManager.getConnection( this.dbUrl) ;
+    
   }
 
   public void setLogger( PrintWriter logger)

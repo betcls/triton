@@ -1,22 +1,14 @@
 import java.io.IOException;
 import java.util.Enumeration;
 
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-
-
-
-/**
- * Servlet implementation class Ip
- */
-@WebServlet("/Ip")
-public class Ip extends HttpServlet 
+@WebServlet("/test01")
+public class Test01 extends HttpServlet 
 {
 	private static final long serialVersionUID = 1L;
        
@@ -26,7 +18,7 @@ public class Ip extends HttpServlet
     /**
      * @see HttpServlet#HttpServlet()
      */
-    public Ip() 
+    public Test01() 
     {
         super();
         // TODO Auto-generated constructor stub
